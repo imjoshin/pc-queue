@@ -8,7 +8,7 @@ When high-demand product drops occur, Pokémon Center places users in a virtual 
 
 ## 🔍 What It Does
 
-The Pokémon Center site already updates your queue position using JavaScript. However, the element that holds the position (`#position`) is present in the DOM but **not rendered**. This extension:
+The Pokémon Center site already updates your queue position using JavaScript. However, the element that holds the position (`#position`) is **not rendered**. This extension:
 
 1. **Adds a missing DOM element** that Pokémon Center's script will update with your current position.
 2. **Observes changes** to that position.
