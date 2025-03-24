@@ -29,3 +29,17 @@ You’ll see this information right on the queue screen, updating automatically.
 - **Track Position Over Time**: It keeps a time-stamped history of your previous positions.
   - When your position updates, it calculates how long it took to move and estimates how long you have left.
   - The estimate improves the longer you stay in queue.
+
+## Privacy Policy
+
+This extension does not collect, store, or transmit any personal user data.
+
+### Data Collection & Usage
+
+The extension runs entirely in your browser and only interacts with the content of the pokemoncenter.com website. It observes changes to queue-related elements on the page to display your current queue position and estimated wait time. No data is collected, stored, or sent to any server.
+
+### Data Sharing
+
+No user data is shared with any third parties. The extension operates locally and does not communicate with any external services.
+
+If any future updates introduce data collection, users will be notified with a clear in-product disclosure and this policy will be updated accordingly.
