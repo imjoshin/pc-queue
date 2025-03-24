@@ -29,5 +29,3 @@ You’ll see this information right on the queue screen, updating automatically.
 - **Track Position Over Time**: It keeps a time-stamped history of your previous positions.
   - When your position updates, it calculates how long it took to move and estimates how long you have left.
   - The estimate improves the longer you stay in queue.
-
-- **Efficient DOM Watching**: A `MutationObserver` watches for changes to the hidden position element and
