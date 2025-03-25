@@ -30,7 +30,42 @@ You’ll see this information right on the queue screen, updating automatically.
   - When your position updates, it calculates how long it took to move and estimates how long you have left.
   - The estimate improves the longer you stay in queue.
 
-## Privacy Policy
+---
+
+Absolutely! Here's an **Installation** section you can include in your README:
+
+---
+
+## 🚀 Installation
+
+### Option 1: Install from Chrome Web Store _(Recommended)_
+
+> 🔗 [**Click here to install from the Chrome Web Store**](#)  
+> _(Link coming soon once published)_
+
+This is the easiest way to install and receive updates automatically.
+
+### Option 2: Load Unpacked Extension from GitHub
+
+1. **Download the ZIP** of this repository:  
+   [Click here to download](https://github.com/imjoshin/pc-queue/archive/refs/heads/main.zip)
+
+2. **Unzip the file** to a folder on your computer.
+
+3. Open **Chrome**, go to `chrome://extensions/` in your address bar.
+
+4. In the top right, **enable "Developer mode"**.
+
+5. Click **"Load unpacked"**, then select the folder where you unzipped the extension.
+
+6. Done!
+
+---
+
+Let me know if you want a badge or visual walkthrough added too
+---
+
+## ℹ️ Privacy Policy
 
 This extension does not collect, store, or transmit any personal user data.
 
