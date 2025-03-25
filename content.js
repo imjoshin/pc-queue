@@ -9,6 +9,8 @@ const timeId = "time-info";
 
 let updateDisplayInterval = null;
 let positionObserver = null;
+let hitTimingThreshold = false;
+let hitPositionThreshold = false;
 
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -30,7 +32,9 @@ function updateDisplay() {
     const timeDiff = time - lastTime;
     const msPerMove = timeDiff / Math.abs(positionDiff);
     const msLeft = position * msPerMove;
-    const secondsLeft = Math.floor(msLeft / 1000);
+
+    // Give a 20% buffer to seconds Left
+    const secondsLeft = Math.floor(msLeft / 1000) * 1.2;
 
     // Calculate difference between last update and what our estimated metrics are
     const msSinceLastUpdate = now - time;
@@ -63,8 +67,19 @@ function updateDisplay() {
     const timeInfo = document.getElementById(timeId);
     const queueInfo = document.getElementById(queueId);
 
-    timeInfo.innerText = `Remaining time in queue: ${remainingTime.join(', ')}`;
-    queueInfo.innerText = `You are currently in position ${numberWithCommas(position - positionChangeSinceLastUpdate)}.`;
+    if (secondsLeft > 30 && !hitTimingThreshold) {
+        timeInfo.innerText = `Remaining time in queue: ${remainingTime.join(', ')}`;
+    } else {
+        hitTimingThreshold = true;
+        timeInfo.innerText = `Any second now...`;
+    }
+    
+    if (position - positionChangeSinceLastUpdate > 1000 && !hitPositionThreshold) {
+        queueInfo.innerText = `You're currently in position ${numberWithCommas(position - positionChangeSinceLastUpdate)}.`;
+    } else {
+        hitPositionThreshold = true;
+        queueInfo.innerText = `You're at the front of the line!`;
+    }
 }
 
 function handlePositionChange() {
