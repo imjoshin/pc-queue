@@ -16,6 +16,8 @@ The Pokémon Center site already updates your queue position using JavaScript. H
 
 You’ll see this information right on the queue screen, updating automatically.
 
+![Pokémon Center Queue Extension in action](./cover.png)
+
 ---
 
 ## 🛠️ How It Works
