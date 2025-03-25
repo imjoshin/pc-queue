@@ -32,10 +32,6 @@ You’ll see this information right on the queue screen, updating automatically.
 
 ---
 
-Absolutely! Here's an **Installation** section you can include in your README:
-
----
-
 ## 🚀 Installation
 
 ### Option 1: Install from Chrome Web Store _(Recommended)_
@@ -60,9 +56,6 @@ This is the easiest way to install and receive updates automatically.
 
 6. Done!
 
----
-
-Let me know if you want a badge or visual walkthrough added too
 ---
 
 ## ℹ️ Privacy Policy
