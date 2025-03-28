@@ -38,8 +38,7 @@ You’ll see this information right on the queue screen, updating automatically.
 
 ### Option 1: Install from Chrome Web Store _(Recommended)_
 
-> 🔗 [**Click here to install from the Chrome Web Store**](#)  
-> _(Link coming soon once published)_
+> 🔗 [**Click here to install from the Chrome Web Store**](https://chromewebstore.google.com/detail/pc-queue/nlppgblohlmddlmmiedakfcbgoablchp)  
 
 This is the easiest way to install and receive updates automatically.
 
