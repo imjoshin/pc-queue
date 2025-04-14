@@ -46,7 +46,7 @@ function updateDisplay() {
     const hours = Math.floor(seconds / 3600);
     seconds %= 3600;
     const minutes = Math.floor(seconds / 60);
-    seconds = seconds % 60;
+    seconds = Math.floor(seconds % 60);
 
     // Set time left display
     let remainingTime = [`${seconds} second${seconds !== 1 ? 's' : ''}`]
@@ -68,7 +68,7 @@ function updateDisplay() {
     const queueInfo = document.getElementById(queueId);
 
     if (secondsLeft > 30 && !hitTimingThreshold) {
-        timeInfo.innerText = `Remaining time in queue: ${remainingTime.join(', ')}`;
+        timeInfo.innerText = `Estimated time remaining in queue: ${remainingTime.join(', ')}`;
     } else {
         hitTimingThreshold = true;
         timeInfo.innerText = `Any second now...`;
