@@ -1,6 +1,6 @@
 {
   "name": "PC Queue",
-  "description": "PC Queue has moved to CardScout. Install CardScout for queue tracking and more.",
+  "description": "PC Queue has moved to CardScout. Try CardScout for queue tracking and more.",
   "version": "1.3",
   "manifest_version": 3,
   "permissions": ["activeTab"],
