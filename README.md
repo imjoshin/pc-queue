@@ -1,20 +1,20 @@
 # Pokémon Center Queue Position Viewer
 
-This Chrome extension reveals your **current queue position** and **estimated wait time** while waiting in line on [PokemonCenter.com](https://www.pokemoncenter.com).
-
-When high-demand product drops occur, Pokémon Center places users in a virtual queue. While the backend tracks your position, the site doesn't display it. This extension makes that hidden information visible — so you’re no longer left in the dark about how far you have to go.
+> **This extension has been deprecated.** Queue tracking and more is now available in [CardScout](https://cardscout.co). Thank you to the thousands of trainers who downloaded and used PC Queue. Your support meant everything and helped shape what CardScout has become.
 
 ---
 
-## 🔍 What It Does
+## What now?
 
-The Pokémon Center site already updates your queue position using JavaScript. However, the element that holds the position (`#position`) is **not rendered**. This extension:
+PC Queue's functionality has been rolled into [CardScout](https://cardscout.co), which offers queue tracking along with deal alerts, price comparisons, and more across Pokémon and other TCGs.
 
-1. **Adds a missing DOM element** that Pokémon Center's script will update with your current position.
-2. **Observes changes** to that position.
-3. **Displays your queue position** and an **estimated time remaining** based on how quickly your position is moving.
+---
 
-You’ll see this information right on the queue screen, updating automatically.
+## Original Description
+
+This Chrome extension revealed your **current queue position** and **estimated wait time** while waiting in line on [PokemonCenter.com](https://www.pokemoncenter.com).
+
+When high-demand product drops occurred, Pokémon Center placed users in a virtual queue. While the backend tracked your position, the site didn't display it. This extension made that hidden information visible.
 
 ![Pokémon Center Queue Extension in action](./cover.png)
 
@@ -23,7 +23,6 @@ You’ll see this information right on the queue screen, updating automatically.
 ## 🛠️ How It Works
 
 - **Insert Hidden Element**: When the extension detects that you're in the queue, it adds a hidden `<span id="position">` element to the page. Pokémon Center’s existing code starts updating this span with your position number.
-  
 - **Render Display Elements**: The extension also adds two visible UI elements:
   - A message like `You are currently in position 3,402.`
   - An estimate like `Remaining time in queue: 12 minutes, 8 seconds`
@@ -38,7 +37,7 @@ You’ll see this information right on the queue screen, updating automatically.
 
 ### Option 1: Install from Chrome Web Store _(Recommended)_
 
-> 🔗 [**Click here to install from the Chrome Web Store**](https://chromewebstore.google.com/detail/pc-queue/nlppgblohlmddlmmiedakfcbgoablchp)  
+> 🔗 [**Click here to install from the Chrome Web Store**](https://chromewebstore.google.com/detail/pc-queue/nlppgblohlmddlmmiedakfcbgoablchp)
 
 This is the easiest way to install and receive updates automatically.
 

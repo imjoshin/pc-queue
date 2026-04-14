@@ -1,164 +1,137 @@
-const REFRESH_INTERVAL = 1000;
-const WAITING_TIMEOUT = 5000;
+const API_HOST = 'https://api.cardscout.co';
+const POLL_INTERVAL_MS = 120000;
 
-const queueTimes = []; // array of [time, position]
+let pollingTimer = null;
+let wasInQueue = false;
 
-const positionId = "position";
-const queueId = "queue-info";
-const timeId = "time-info";
-
-let updateDisplayInterval = null;
-let positionObserver = null;
-let hitTimingThreshold = false;
-let hitPositionThreshold = false;
-
-function numberWithCommas(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+function parseWaitTime(text) {
+    if (!text) return null;
+    const match = text.trim().match(/^(\d{2}):(\d{2}):(\d{2})$/);
+    if (!match) return null;
+    return parseInt(match[1], 10) * 3600 + parseInt(match[2], 10) * 60 + parseInt(match[3], 10);
 }
 
-function updateDisplay() {
-    // If we haven't had two updates yet, we can't do any estimations
-    if (queueTimes.length < 2) {
-        return;
+function findIncapsulaIframe() {
+    const iframes = document.querySelectorAll('iframe');
+    for (const iframe of iframes) {
+        if (iframe.src && iframe.src.includes('/_Incapsula_Resource')) {
+            return iframe;
+        }
+    }
+    return null;
+}
+
+function detectIncapsulaIframe() {
+    return findIncapsulaIframe() !== null;
+}
+
+function getEstimatedWaitTime() {
+    // Check current document first (works when running inside the iframe via all_frames)
+    const ttwElement = document.getElementById('ttw');
+    if (ttwElement) {
+        const seconds = parseWaitTime(ttwElement.textContent);
+        if (seconds !== null) return seconds;
     }
 
-    const [lastTime, lastPosition] = queueTimes[queueTimes.length - 2];
-    const [time, position] = queueTimes[queueTimes.length - 1];
+    // Fall back to reaching into the iframe from the parent document
+    const iframe = findIncapsulaIframe();
+    if (!iframe) return undefined;
 
-    const now = Date.now();
+    try {
+        const iframeDoc = iframe.contentDocument || (iframe.contentWindow && iframe.contentWindow.document);
+        if (!iframeDoc) return undefined;
 
-    // Calculate time left
-    const positionDiff = position - lastPosition;
-    const timeDiff = time - lastTime;
-    const msPerMove = timeDiff / Math.abs(positionDiff);
-    const msLeft = position * msPerMove;
+        const iframeTtw = iframeDoc.getElementById('ttw');
+        if (!iframeTtw) return undefined;
 
-    // Give a 20% buffer to seconds Left
-    const secondsLeft = Math.floor(msLeft / 1000) * 1.2;
-
-    // Calculate difference between last update and what our estimated metrics are
-    const msSinceLastUpdate = now - time;
-    // Give a 40% decrease so we will rarely see the number go UP when an update happens
-    const positionChangeSinceLastUpdate = Math.floor(msSinceLastUpdate / msPerMove * 0.6);
-
-    // Find hr/min/sec
-    let seconds = secondsLeft - Math.floor(msSinceLastUpdate / 1000);
-    const hours = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const minutes = Math.floor(seconds / 60);
-    seconds = Math.floor(seconds % 60);
-
-    // Set time left display
-    let remainingTime = [`${seconds} second${seconds !== 1 ? 's' : ''}`]
-    if (hours) {
-        remainingTime = [
-            `${hours} hour${hours !== 1 ? 's' : ''}`,
-            `${minutes} minute${minutes !== 1 ? 's' : ''}`,
-            `${seconds} second${seconds !== 1 ? 's' : ''}`,
-        ]
-    } else if (minutes) {
-        remainingTime = [
-            `${minutes} minute${minutes !== 1 ? 's' : ''}`,
-            `${seconds} second${seconds !== 1 ? 's' : ''}`,
-        ]
-    }
-
-    // Set display
-    const timeInfo = document.getElementById(timeId);
-    const queueInfo = document.getElementById(queueId);
-
-    if (secondsLeft > 30 && !hitTimingThreshold) {
-        timeInfo.innerText = `Estimated time remaining in queue: ${remainingTime.join(', ')}`;
-    } else {
-        hitTimingThreshold = true;
-        timeInfo.innerText = `Any second now...`;
-    }
-    
-    if (position - positionChangeSinceLastUpdate > 1000 && !hitPositionThreshold) {
-        queueInfo.innerText = `You're currently in position ${numberWithCommas(position - positionChangeSinceLastUpdate)}.`;
-    } else {
-        hitPositionThreshold = true;
-        queueInfo.innerText = `You're at the front of the line!`;
+        const seconds = parseWaitTime(iframeTtw.textContent);
+        return seconds !== null ? seconds : undefined;
+    } catch (e) {
+        // Cross-origin iframe — can't access content
+        return undefined;
     }
 }
 
-function handlePositionChange() {
-    // Base case checks, make sure we have all that we need
-    const p = document.getElementById(positionId);
-    if (!p) {
-        return;
-    }
-    
-    const position = parseInt(p.innerText);
-    if (!position) {
-        return;
-    }
+async function postQueueStatus(payload, done) {
+    const url = done
+        ? `${API_HOST}/pokemon/queue?done=true`
+        : `${API_HOST}/pokemon/queue`;
 
-    const now = Date.now();
+    await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, source: 'pc-queue-extension' }),
+    });
+}
 
-    if (queueTimes.length === 0) {
-        // Set up initial display
-        const timeInfo = document.getElementById(timeId);
-        const queueInfo = document.getElementById(queueId);
+async function reportQueueStatus(done) {
+    const payload = {};
 
-        timeInfo.innerText = `Calculating remaining time...`;
-        queueInfo.innerText = `You are currently in position ${numberWithCommas(position)}.`;
-
-        queueTimes.push([now, position]);
-    } else {
-        // If we had a previous queue time, check if there's a difference
-        const [lastTime, lastPosition] = queueTimes[queueTimes.length - 1];
-        if (lastPosition !== position) {
-            queueTimes.push([now, position]);
+    if (!done) {
+        const waitTime = getEstimatedWaitTime();
+        if (waitTime !== undefined) {
+            payload.estimatedWaitTime = waitTime;
         }
     }
 
+    try {
+        await postQueueStatus(payload, done);
+    } catch (e) {
+        // Silently fail — don't disrupt the user's browsing
+    }
 }
 
-// Callback for observer
-function watchPositionChange(mutationsList, observer) {
-    for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-            handlePositionChange();
+function stopPolling() {
+    if (pollingTimer !== null) {
+        clearInterval(pollingTimer);
+        pollingTimer = null;
+    }
+}
+
+function startPolling() {
+    stopPolling();
+    wasInQueue = true;
+
+    // Report immediately
+    reportQueueStatus(false);
+
+    // Then every 120 seconds
+    pollingTimer = setInterval(() => {
+        if (!detectIncapsulaIframe()) {
+            // Queue cleared
+            stopPolling();
+            reportQueueStatus(true);
+            wasInQueue = false;
+            return;
         }
-    }
+        reportQueueStatus(false);
+    }, POLL_INTERVAL_MS);
 }
 
-// Watch for our elements to appear, if we are in the queue
-let startTime = Date.now();
-const checker = setInterval(() => {
-    const waitingText = document.getElementsByClassName("waiting-text")
-
-    // Yay (sorta?), we're in the queue
-    if (waitingText.length && !positionObserver) {
-        // Create the element that PC attaches position to
-        const span = document.createElement("span");
-        span.setAttribute("id", positionId);
-        span.setAttribute("style", "display: none");
-
-        // Create our elements
-        const queueInfo = document.createElement("div");
-        queueInfo.setAttribute("id", queueId);
-        queueInfo.classList.add("waiting-text");
-
-        const timeInfo = document.createElement("p");
-        timeInfo.setAttribute("id", timeId);
-        timeInfo.classList.add("sub-text");
-        
-        waitingText[0].parentElement.appendChild(span);
-        waitingText[0].parentElement.appendChild(queueInfo);
-        waitingText[0].parentElement.appendChild(timeInfo);
-        
-        // Kick off our position observer
-        handlePositionChange();
-        positionObserver = new MutationObserver(watchPositionChange);
-        positionObserver.observe(span, { childList: true });
-        updateDisplay();
-        setInterval(updateDisplay, REFRESH_INTERVAL);
+function init() {
+    if (detectIncapsulaIframe()) {
+        startPolling();
+    } else if (wasInQueue) {
+        reportQueueStatus(true);
+        wasInQueue = false;
     }
 
-    // If we don't see the waiting-text within 5 seconds, stop checking
-    if (Date.now() - startTime > WAITING_TIMEOUT || waitingText || !!positionObserver) {
-        clearInterval(checker);
-    }
-}, 500)
+    // Watch for dynamically added iframes
+    const observer = new MutationObserver(() => {
+        const inQueue = detectIncapsulaIframe();
+        if (inQueue && pollingTimer === null) {
+            startPolling();
+        } else if (!inQueue && pollingTimer !== null) {
+            stopPolling();
+            reportQueueStatus(true);
+            wasInQueue = false;
+        }
+    });
+
+    observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+    });
+}
+
+init();
